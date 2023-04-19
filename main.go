@@ -56,7 +56,7 @@ func main() {
 
 	fmt.Printf("%-40s %-36s %-36s %-10s\n", "Subscription_Name", "Subscription", "Tenant", "Is_Default")
 	for _, sub := range subs.Values() {
-		fmt.Printf("%-40s %-36s %-36s %-10v\n", *sub.DisplayName, *sub.SubscriptionID, *sub.TenantID, *sub.State == "Enabled")
+		fmt.Printf("%-40s %-36s %-36s %-10v\n", *sub.DisplayName, *sub.SubscriptionID, *sub.TenantID, sub.State == "Enabled")
 	}
 
 	fmt.Println("\n-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n")
