@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -35,7 +36,24 @@ func readCredentialsFromFile() (string, string, string, error) {
 	return clientID, clientSecret, tenantID, scanner.Err()
 }
 
+func getDefaultSubscriptionID() (string, error) {
+	cmd := exec.Command("az", "account", "show", "--query", "id", "-o", "json")
+	output, err := cmd.Output()
+	if err != nil {
+		return "", err
+	}
+
+	var defaultSubscriptionID string
+	err = json.Unmarshal(output, &defaultSubscriptionID)
+	if err != nil {
+		return "", err
+	}
+
+	return defaultSubscriptionID, nil
+}
+
 func main() {
+
 	ctx := context.Background()
 
 	clientID, clientSecret, tenantID, err := readCredentialsFromFile()
@@ -61,9 +79,16 @@ func main() {
 		return
 	}
 
+	defaultSubscriptionID, err := getDefaultSubscriptionID()
+	if err != nil {
+		fmt.Printf("Failed to get default subscription ID: %v\n", err)
+		return
+	}
+
 	fmt.Printf("%-40s %-36s %-36s %-10s\n", "Subscription_Name", "Subscription", "Tenant", "Is_Default")
 	for _, sub := range subs.Values() {
-		fmt.Printf("%-40s %-36s %-36s %-10v\n", *sub.DisplayName, *sub.SubscriptionID, *sub.TenantID, *sub.IsDefault)
+		isDefault := *sub.SubscriptionID == defaultSubscriptionID
+		fmt.Printf("%-40s %-36s %-36s %-10v\n", *sub.DisplayName, *sub.SubscriptionID, *sub.TenantID, isDefault)
 	}
 
 	fmt.Println("\n-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n")
