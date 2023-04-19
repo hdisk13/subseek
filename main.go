@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -35,6 +36,8 @@ func readCredentialsFromFile() (string, string, string, error) {
 }
 
 func main() {
+	ctx := context.Background()
+
 	clientID, clientSecret, tenantID, err := readCredentialsFromFile()
 	if err != nil {
 		fmt.Printf("Failed to read credentials: %v\n", err)
@@ -52,7 +55,18 @@ func main() {
 	client.Authorizer = authorizer
 
 	// List Azure subscriptions
-	// ... (unchanged)
+	subs, err := client.List(ctx)
+	if err != nil {
+		fmt.Printf("Failed to list Azure subscriptions: %v\n", err)
+		return
+	}
+
+	fmt.Printf("%-40s %-36s %-36s %-10s\n", "Subscription_Name", "Subscription", "Tenant", "Is_Default")
+	for _, sub := range subs.Values() {
+		fmt.Printf("%-40s %-36s %-36s %-10v\n", *sub.DisplayName, *sub.SubscriptionID, *sub.TenantID, *sub.IsDefault)
+	}
+
+	fmt.Println("\n-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n")
 
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print("Activate which subscription?  (enter==don't change) >> ")
