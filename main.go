@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -36,8 +35,6 @@ func readCredentialsFromFile() (string, string, string, error) {
 }
 
 func main() {
-	ctx := context.Background()
-
 	clientID, clientSecret, tenantID, err := readCredentialsFromFile()
 	if err != nil {
 		fmt.Printf("Failed to read credentials: %v\n", err)
